@@ -445,7 +445,10 @@ CModule::EModRet CClientBufferMod::OnPrivBufferPlayLine2(CClient& client, CStrin
 bool CClientBufferMod::AddClient(const CString& identifier)
 {
     m_bDirty = true;
-    return SetNV(identifier, "", false);
+    bool ok = SetNV(identifier, "", false);
+    if (ok && m_iTimeLimit)
+        SetNV(identifier + "/timelimit", CString(m_iTimeLimit), false);
+    return ok;
 }
 
 /// Remove a client identifier.
@@ -606,7 +609,7 @@ bool CClientBufferMod::WithinTimeLimit(const timeval& tv, const CString& identif
 		return true;
 	timeval now;
 	gettimeofday(&now, NULL);
-	return now.tv_sec - tv.tv_sec < timeLimit ? timeLimit : m_iTimeLimit;
+	return now.tv_sec - tv.tv_sec < (timeLimit ? timeLimit : m_iTimeLimit);
 }
 
 template<> void TModInfo<CClientBufferMod>(CModInfo& info) {
